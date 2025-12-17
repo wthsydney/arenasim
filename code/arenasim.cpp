@@ -1,9 +1,28 @@
 #include "raylib.h"
 
-void
-DrawBalls(int posX, int posY)
+struct Warrior {
+    Color COLOR;
+    int health;
+    int damage;
+};
+
+void DrawMenu()
 {
-    DrawCircle(posX, posY, 50, RED);
+    int positionX = 50;
+    int positionY = 100;
+    int width = 150;
+    int height = 50;
+    for (int i = 0; i < 5; i++)
+    {
+        DrawRectangle(positionX, positionY + (i * 100), width, height, LIGHTGRAY);
+	DrawRectangleLines(positionX, positionY + (i * 100), width, height, BLACK);
+	DrawText("Ball", positionX, positionY + (i * 100), 32, BLACK);       
+    }
+}
+
+void DrawBalls()
+{
+    DrawCircle(100, 300, 50, RED);
 }
 
 int main(void)
@@ -15,7 +34,8 @@ int main(void)
         BeginDrawing();
             ClearBackground(RAYWHITE);
 
-	    DrawBalls(100, 100);
+	    DrawBalls();
+	    DrawMenu();
             DrawText("WIP: Arena Simulator", 190, 300, 20, LIGHTGRAY);
 	    
         EndDrawing();
