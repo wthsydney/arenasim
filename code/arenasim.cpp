@@ -4,6 +4,10 @@
 #define local_persist static
 #define global_variable static
 
+// TODO(Patryk): Those are global for now
+global_variable int selectedBallS1 = 0;
+global_variable int selectedBallS2 = 0;
+
 struct Warrior
 {
     Color COLOR;
@@ -25,7 +29,8 @@ DrawButton(int posX, int posY, int width, int height, const char* text, bool isS
     }
     else if (CheckCollisionPointRec(mousePos, buttonBounds))
     {
-        buttonColor = LIGHTGRAY; // Hover color
+	// Hover color
+        buttonColor = LIGHTGRAY;
     }
 
     DrawRectangleRec(buttonBounds, buttonColor);
@@ -33,16 +38,16 @@ DrawButton(int posX, int posY, int width, int height, const char* text, bool isS
     DrawText(text, posX + 10, posY + 10, 20, BLACK);
 }
 
-global_variable int selectedBallS1 = 0;
-global_variable int selectedBallS2 = 0;
-
-internal void
+internal int
 DrawMenu()
 {
     const char* balls[] = {"Unarmed", "Sword", "Spear", "Duplicator", "Dagger"};
     Vector2 mousePos = GetMousePosition();
 
     DrawText("Choose ball no.1", 40, 25, 20, BLACK);
+
+    // TODO(Patryk): For some reason when I take the properties outside the
+    // function, something's wrong.
     
     // Left buttons
     for (int i = 0; i < 5; i++)
@@ -79,6 +84,10 @@ DrawMenu()
         // Draw the button, telling it if it should be blue (isSelected)
         DrawButton(x, y, w, h, balls[i], (selectedBallS2 == i));
     }
+
+    DrawButton();
+
+    return selectedBallS1, selectedBallS2;
 }
 
 void DrawBalls()
