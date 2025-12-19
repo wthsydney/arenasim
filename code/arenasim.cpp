@@ -1,4 +1,5 @@
 #include "raylib.h"
+#include <stdio.h>
 
 #define internal static
 #define local_persist static
@@ -13,7 +14,14 @@ struct Warrior
     Color COLOR;
     int health;
     int damage;
+    int speed;
 };
+
+internal void
+RenderGame()
+{
+    CloseWindow();
+}
 
 internal void
 DrawButton(int posX, int posY, int width, int height, const char* text, bool isSelected)
@@ -35,13 +43,14 @@ DrawButton(int posX, int posY, int width, int height, const char* text, bool isS
 
     DrawRectangleRec(buttonBounds, buttonColor);
     DrawRectangleLines(posX, posY, width, height, BLACK);
-    DrawText(text, posX + 10, posY + 10, 20, BLACK);
+    DrawText(text, posX, posY, 20, BLACK);
 }
 
+// TODO: Figure out how to NOT return multiple variables
 internal int
 DrawMenu()
 {
-    const char* balls[] = {"Unarmed", "Sword", "Spear", "Duplicator", "Dagger"};
+    const char* balls[] = {"Unarmed", "Sword", "Spear", "Grower", "Dagger"};
     Vector2 mousePos = GetMousePosition();
 
     DrawText("Choose ball no.1", 40, 25, 20, BLACK);
@@ -58,7 +67,8 @@ DrawMenu()
 	int h = 50;
     
         Rectangle bounds = {(float)x, (float)y, (float)w, (float)h};
-        if (CheckCollisionPointRec(mousePos, bounds) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+        if (CheckCollisionPointRec(mousePos, bounds)
+	    && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
         {
             selectedBallS1 = i; // Save the choice!
         }
@@ -76,7 +86,8 @@ DrawMenu()
 	int h = 50;
     
         Rectangle bounds = {(float)x, (float)y, (float)w, (float)h};
-        if (CheckCollisionPointRec(mousePos, bounds) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+        if (CheckCollisionPointRec(mousePos, bounds)
+	    && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
         {
             selectedBallS2 = i; // Save the choice!
         }
@@ -85,8 +96,18 @@ DrawMenu()
         DrawButton(x, y, w, h, balls[i], (selectedBallS2 == i));
     }
 
-    DrawButton();
-
+    int px = 255;
+    int py = 300;
+    int pw = 90;
+    int ph = 30;
+    Rectangle playButtonBounds = {(float)px, (float)py, (float)pw, (float)ph};
+    if (CheckCollisionPointRec(mousePos, playButtonBounds)
+	&& IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+    {
+	RenderGame();
+    }
+    
+    DrawButton(255, 300, 90, 30, "PLAY", 0);
     return selectedBallS1, selectedBallS2;
 }
 
@@ -98,7 +119,14 @@ void DrawBalls()
 
 int main(void)
 {
-    InitWindow(600, 600, "Arena Sim");
+    // TODO(Patryk): Make the arena window independent?
+    int screenWidth = 600;
+    int screenHeight = 600;
+    bool start = false;
+
+    SetTargetFPS(60);
+    
+    InitWindow(screenWidth, screenHeight, "Arena Sim");
 
     while (!WindowShouldClose())
     {
@@ -108,6 +136,11 @@ int main(void)
 
 	    DrawBalls();
 	    DrawMenu();
+
+	    if (start == true)
+	    {
+		DrawText("IT WORKS!", 0, 0, 50, GREEN);
+	    }
 	    
         EndDrawing();
     }
