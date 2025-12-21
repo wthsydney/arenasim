@@ -1,26 +1,70 @@
 #include "raylib.h"
+#include <stdlib.h>
 #include <stdio.h>
 
 #define internal static
 #define local_persist static
 #define global_variable static
 
-// TODO(Patryk): Those are global for now
-global_variable int selectedBallS1 = 0;
-global_variable int selectedBallS2 = 0;
+#define BALL_BASE_SIZE 20.0f
+#define DEF_BALL_SPEED 5.0f
+#define MAX_BALLS 2
 
-struct Warrior
-{
+typedef struct Warrior {
     Color COLOR;
     int health;
     int damage;
-    int speed;
-};
+    float radius;
+    Vector2 speed;
+    Vector2 position;
+    bool active;
+} Warrior;
+
+// TODO(Patryk): Those are global for now
+global_variable int selectedBallS1 = 0;
+global_variable int selectedBallS2 = 0;
+global_variable bool gameRunning = false;
+global_variable bool gameOver = false;
+
+global_variable Warrior warriors[MAX_BALLS] = { 0 };
+
+global_variable bool victory = false;
+global_variable bool lose = false;
+// global_variable bool awake = false;
+
+void DrawBalls()
+{
+    int posx, posy;
+    int velx = 0;
+    int vely = 0;
+    
+    // Initialize warriors
+    for (int i = 0; i < MAX_BALLS; i++)
+    {
+        warriors[i].radius = 40.0f;
+        posx = GetRandomValue(0 + warriors[i].radius, GetScreenWidth() - warriors[i].radius);
+        posy = GetRandomValue(0 + warriors[i].radius, GetScreenHeight()/2);
+
+        warriors[i].position = (Vector2){ posx, posy };
+
+        while ((velx == 0) || (vely == 0))
+        {
+            velx = GetRandomValue(-DEF_BALL_SPEED, DEF_BALL_SPEED);
+            vely = GetRandomValue(-DEF_BALL_SPEED, DEF_BALL_SPEED);
+        }
+
+        warriors[i].speed = (Vector2){ velx, vely };
+        warriors[i].health = 200;
+        warriors[i].active = true;
+
+	printf("%d\n", warriors[i].active);
+    }
+}
 
 internal void
 RenderGame()
 {
-    CloseWindow();
+    DrawBalls();
 }
 
 internal void
@@ -42,12 +86,12 @@ DrawButton(int posX, int posY, int width, int height, const char* text, bool isS
     }
 
     DrawRectangleRec(buttonBounds, buttonColor);
-    DrawRectangleLines(posX, posY, width, height, BLACK);
+    // DrawRectangleLines(posX, posY, width, height, BLACK);
     DrawText(text, posX, posY, 20, BLACK);
 }
 
 // TODO: Figure out how to NOT return multiple variables
-internal int
+internal void
 DrawMenu()
 {
     const char* balls[] = {"Unarmed", "Sword", "Spear", "Grower", "Dagger"};
@@ -73,7 +117,7 @@ DrawMenu()
             selectedBallS1 = i; // Save the choice!
         }
 
-        // Draw the button, telling it if it should be blue (isSelected)
+        // Draw the button, telling it if it should be selected (isSelected)
         DrawButton(x, y, w, h, balls[i], (selectedBallS1 == i));
     }
 
@@ -89,7 +133,7 @@ DrawMenu()
         if (CheckCollisionPointRec(mousePos, bounds)
 	    && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
         {
-            selectedBallS2 = i; // Save the choice!
+            selectedBallS2 = i;
         }
 
         // Draw the button, telling it if it should be blue (isSelected)
@@ -104,17 +148,11 @@ DrawMenu()
     if (CheckCollisionPointRec(mousePos, playButtonBounds)
 	&& IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
     {
+	gameRunning = true;
 	RenderGame();
     }
     
     DrawButton(255, 300, 90, 30, "PLAY", 0);
-    return selectedBallS1, selectedBallS2;
-}
-
-void DrawBalls()
-{
-    Color BallColor = RED;
-    DrawCircle(100, 300, 50, BallColor);
 }
 
 int main(void)
@@ -122,25 +160,30 @@ int main(void)
     // TODO(Patryk): Make the arena window independent?
     int screenWidth = 600;
     int screenHeight = 600;
-    bool start = false;
 
+    int arenaWidth;
+    int arenaHeight;
+
+    // I think I will cap the game at 60 fps
     SetTargetFPS(60);
     
     InitWindow(screenWidth, screenHeight, "Arena Sim");
 
+    // This will make sure the game runs properly regardless of framerate
+    // but I don't know if I will use it
+    // float deltaTime = GetFrameTime();
     while (!WindowShouldClose())
     {
-	
         BeginDrawing();
-            ClearBackground(RAYWHITE);
-
-	    DrawBalls();
+	ClearBackground(RAYWHITE);
+	if (gameRunning)
+	{
+	    RenderGame();
+	}
+	else
+	{
 	    DrawMenu();
-
-	    if (start == true)
-	    {
-		DrawText("IT WORKS!", 0, 0, 50, GREEN);
-	    }
+	}
 	    
         EndDrawing();
     }
